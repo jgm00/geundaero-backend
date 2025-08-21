@@ -2,6 +2,7 @@ package hexagon_talent.geundaero.exception;
 
 
 import hexagon_talent.geundaero.common.ApiResponse;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -29,6 +30,17 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(UnauthorizedAccessException.class)
     public ResponseEntity<ApiResponse<Object>> handleUnauthorized(UnauthorizedAccessException ex) {
         return ResponseEntity.ok(ApiResponse.fail("4001", ex.getMessage()));
+    }
+
+
+    @ExceptionHandler(ExternalApiException.class)
+    public ResponseEntity<ApiResponse<Void>> handleExternalApi(ExternalApiException e) {
+        return ResponseEntity
+                .status(HttpStatus.BAD_GATEWAY)
+                .body(ApiResponse.fail(
+                        e.getErrorStatus().getCode(),
+                        e.getErrorStatus().getMsg()
+                ));
     }
 
 

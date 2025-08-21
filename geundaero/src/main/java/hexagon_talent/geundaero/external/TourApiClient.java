@@ -16,5 +16,21 @@ public interface TourApiClient {
                 @RequestParam("serviceKey") String serviceKey
         );
 
-}
+        @GetMapping("/locationBasedList2")
+        Map<String, Object> getLocationBasedFood(
+                @RequestParam("serviceKey") String serviceKey,
+                @RequestParam("MobileOS") String mobileOS,
+                @RequestParam("MobileApp") String mobileApp,
+                @RequestParam("_type") String type,
 
+                @RequestParam("mapX") double mapX,
+                @RequestParam("mapY") double mapY,
+                @RequestParam("radius") int radius,
+
+                @RequestParam("arrange") String arrange,
+                @RequestParam("contentTypeId") String typeFood,
+
+                @RequestParam("pageNo") int pageNo,
+                @RequestParam("numOfRows") int numOfRows
+        );
+}

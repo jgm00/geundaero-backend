@@ -12,4 +12,5 @@ public interface UserDAO {
     User findById(Long id);
     User findByEmail(String email);
     User findByKakaoId(Long kakaoId);
+    int deleteById(Long id);
 }

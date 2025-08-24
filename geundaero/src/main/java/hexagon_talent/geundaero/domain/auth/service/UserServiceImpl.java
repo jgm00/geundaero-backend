@@ -13,6 +13,8 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserServiceImpl implements UserService{
 
     private final UserDAO userDAO;
+    private final RefreshTokenService refreshTokenService;
+    private final KakaoLoginService kakaoLoginService;
 
     @Override
     @Transactional
@@ -51,5 +53,19 @@ public class UserServiceImpl implements UserService{
     @Override
     public UserSimpleInfoDTO findByIdUserSimpleDTO(Long id) {
         return new UserSimpleInfoDTO(findById(id));
+    }
+
+    @Transactional
+    @Override
+    public void withdrawHard(Long userId, Long kakaoId) {
+        refreshTokenService.deleteAllByUserId(userId);
+
+        try {
+            if (kakaoId != null) {
+                kakaoLoginService.unlink(kakaoId);
+            }
+        } catch (Exception ignore) {
+        }
+        userDAO.deleteById(userId);
     }
 }

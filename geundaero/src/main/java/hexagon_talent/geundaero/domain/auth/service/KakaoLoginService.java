@@ -10,4 +10,5 @@ public interface KakaoLoginService {
     KakaoLoginResponseDTO createTokens(User user, String type);
     String delegateAccessToken(Long id, String email);
     KakaoLoginResponseDTO reissueTokens(String refreshToken);
+    void unlink(Long kakaoId);
 }

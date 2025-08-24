@@ -120,4 +120,26 @@ public interface UserControllerDocs {
     public ResponseEntity<?> findMyInfo(
             @AuthenticationPrincipal Object principal
     );
+
+    @Operation(
+            summary = "회원 탈퇴",
+            description =
+                    "회원 탈퇴 처리: 서버에서 해당 사용자의 Refresh Token을 삭제하고, 카카오 Unlink 수행합니다.\n\n" +
+                            "1️⃣ **동작:**\n" +
+                            "- 요청한 사용자의 Refresh Token을 Redis에서 삭제 후 카카오 Unlink 수행\n\n" +
+                            "2️⃣ **요청 헤더:**\n" +
+                            "- `Authorization`: Bearer {accessToken}\n\n" +
+                            "3️⃣ **응답 예시:**\n\n" +
+                            "```json\n" +
+                            "{\n" +
+                            "  \"code\": \"0\",\n" +
+                            "  \"message\": \"정상 처리 되었습니다.\",\n" +
+                            "  \"data\": {\n" +
+                            "    \"message\": \"회원 탈퇴 되었습니다.\"\n" +
+                            "  }\n" +
+                            "}\n" +
+                            "```"
+    )
+    ResponseEntity<?> deleteMe(@AuthenticationPrincipal CustomUserDetail principal);
+
 }

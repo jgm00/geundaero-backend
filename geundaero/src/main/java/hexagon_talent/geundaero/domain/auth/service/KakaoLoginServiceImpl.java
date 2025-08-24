@@ -1,6 +1,7 @@
 package hexagon_talent.geundaero.domain.auth.service;
 
 import hexagon_talent.geundaero.common.AuthErrorStatus;
+import hexagon_talent.geundaero.domain.auth.dao.UserDAO;
 import hexagon_talent.geundaero.domain.auth.dto.request.KakaoProfileDTO;
 import hexagon_talent.geundaero.domain.auth.dto.response.KakaoLoginResponseDTO;
 import hexagon_talent.geundaero.domain.auth.entity.RefreshToken;
@@ -9,11 +10,9 @@ import hexagon_talent.geundaero.exception.AuthErrorException;
 import hexagon_talent.geundaero.security.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
+import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
 @Service
@@ -23,7 +22,29 @@ public class KakaoLoginServiceImpl implements KakaoLoginService{
     private final RestTemplate restTemplate = new RestTemplate();
     private final JwtTokenProvider jwtProvider;
     private final RefreshTokenService refreshTokenService;
-    private final UserService userService;
+    private final UserDAO userDAO;
+    @Value("${kakao.admin-key}")
+    private String adminKey;
+
+    @Override
+    public void unlink(Long kakaoId) {
+        String url = "https://kapi.kakao.com/v1/user/unlink";
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+        headers.set("Authorization", "KakaoAK " + adminKey);
+
+        LinkedMultiValueMap<String, String> body = new LinkedMultiValueMap<>();
+        body.add("target_id_type", "user_id");
+        body.add("target_id", String.valueOf(kakaoId));
+
+        ResponseEntity<String> res =
+                restTemplate.postForEntity(url, new HttpEntity<>(body, headers), String.class);
+
+        if (!res.getStatusCode().is2xxSuccessful()) {
+            throw new RuntimeException("Kakao unlink failed: http=" + res.getStatusCode());
+        }
+    }
 
     @Value("${kakao.user-info-uri}")
     private String userInfoUri;
@@ -63,7 +84,10 @@ public class KakaoLoginServiceImpl implements KakaoLoginService{
         RefreshToken tokenEntity = refreshTokenService.findByToken(refreshToken)
                 .orElseThrow(() -> new AuthErrorException(AuthErrorStatus.INVALID_TOKEN));
 
-        User user = userService.findById(tokenEntity.getUserId());
+        User user = userDAO.findById(tokenEntity.getUserId());
+        if (user == null) {
+            throw new AuthErrorException(AuthErrorStatus.USER_NOT_FOUND);
+        }
 
         refreshTokenService.delete(refreshToken);
 

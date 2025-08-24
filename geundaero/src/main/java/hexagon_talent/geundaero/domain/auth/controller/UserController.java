@@ -101,4 +101,16 @@ public class UserController implements UserControllerDocs {
         return ResponseEntity.ok(user);
     }
 
+    @DeleteMapping("/me")
+    public ResponseEntity<?> deleteMe(@AuthenticationPrincipal CustomUserDetail principal) {
+        if (principal == null || principal.getUser() == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("사용자를 찾을 수 없습니다.");
+        }
+        Long userId  = principal.getUser().getId();
+        Long kakaoId = principal.getUser().getKakaoId();
+
+        userService.withdrawHard(userId, kakaoId);
+        return ResponseEntity.ok(ApiResponse.success("message", "회원 탈퇴 되었습니다."));
+    }
 }

@@ -79,4 +79,7 @@
         profile_image = VALUES(profile_image),
         updated_at = NOW();
     </insert>
+    <delete id="deleteById" parameterType="long">
+        DELETE FROM users WHERE id = #{id}
+    </delete>
 </mapper>

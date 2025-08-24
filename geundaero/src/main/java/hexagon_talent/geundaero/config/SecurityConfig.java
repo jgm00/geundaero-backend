@@ -54,7 +54,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.POST, "/api/auth/kakao").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/auth/reissue").permitAll()
-
+                        //.requestMatchers(org.springframework.http.HttpMethod.DELETE, "/api/auth/me").authenticated()
+                        .requestMatchers("/login/oauth2/**", "/oauth2/**").permitAll()
                         .requestMatchers(
                                 "/v3/api-docs/**",
                                 "/swagger-ui/**",

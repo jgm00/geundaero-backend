@@ -2,10 +2,16 @@ package hexagon_talent.geundaero.domain.auth.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.connection.RedisConnection;
+import org.springframework.data.redis.core.Cursor;
+import org.springframework.data.redis.core.ScanOptions;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import hexagon_talent.geundaero.domain.auth.entity.RefreshToken;
+
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
+import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
@@ -53,5 +59,29 @@ public class RefreshTokenService {
             }
         }
     }
+    public void deleteAllByUserId(Long userId) {
+        String uid = String.valueOf(userId);
 
+
+        final String pattern = KEY_PREFIX + "*";
+        final HashSet<String> toDelete = new HashSet<>();
+
+        redisTemplate.execute((RedisConnection conn) -> {
+            ScanOptions opts = ScanOptions.scanOptions().match(pattern).count(1000).build();
+            try (Cursor<byte[]> cursor = conn.scan(opts)) {
+                while (cursor.hasNext()) {
+                    String key = new String(cursor.next(), StandardCharsets.UTF_8);
+                    String val = redisTemplate.opsForValue().get(key);
+                    if (uid.equals(val)) {
+                        toDelete.add(key);
+                    }
+                }
+            } catch (Exception ignore) {}
+            return null;
+        });
+
+        if (!toDelete.isEmpty()) {
+            redisTemplate.delete(toDelete);
+        }
+    }
 }

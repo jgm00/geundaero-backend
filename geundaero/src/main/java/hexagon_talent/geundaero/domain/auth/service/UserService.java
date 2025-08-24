@@ -10,6 +10,7 @@ public interface UserService {
     User insertUser(KakaoProfileDTO user);
     User upsertUser(KakaoProfileDTO kakaoProfile);
     boolean existingUser(Long kakaoId);
+    void withdrawHard(Long userId, Long kakaoId);
 
     User findById(Long id);
     User findByEmail(String email);
